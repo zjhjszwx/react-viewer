@@ -114,6 +114,8 @@ interface ViewerProps {
 
   // min scale
   minScale?: number;
+  //展示图片数量
+  navImgs?: number;
 }
 
 export default ViewerProps;

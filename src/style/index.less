@@ -61,20 +61,20 @@
 
   &-close {
     position: fixed;
-    top: 0px;
-    right: 0px;
+    top: 40px;
+    right: 40px;
     overflow: hidden;
-    width: 40px;
-    height: 40px;
-    border-radius: 0 0 0 40px;
+    // width: 40px;
+    // height: 40px;
+    // border-radius: 40px;
     cursor: pointer;
     z-index: @zIndex + 10;
   }
 
   &-close > i {
     position: relative;
-    top: 4px;
-    left: 18px;
+    top: 8px;
+    left: 13px;
   }
 
   &-canvas {
@@ -168,6 +168,9 @@
     // height: @viewer-list-item-height;
     padding: 1px;
     text-align: left;
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
 
   &-list > li {

@@ -1,22 +1,23 @@
-import * as React from 'react';
-import './style/index.less';
-import ViewerCanvas from './ViewerCanvas';
-import ViewerNav from './ViewerNav';
-import ViewerToolbar, { defaultToolbars } from './ViewerToolbar';
-import ViewerProps, { ImageDecorator, ToolbarConfig } from './ViewerProps';
-import Icon, { ActionType } from './Icon';
-import * as constants from './constants';
-import classnames from 'classnames';
+import * as React from "react";
+import "./style/index.less";
+import ViewerCanvas from "./ViewerCanvas";
+import ViewerNav from "./ViewerNav";
+import ViewerToolbar, { defaultToolbars } from "./ViewerToolbar";
+import ViewerProps, { ImageDecorator, ToolbarConfig } from "./ViewerProps";
+import { ActionType } from "./Icon";
+import * as constants from "./constants";
+import classnames from "classnames";
+import close from "./style/images/close.png";
 
-function noop() { }
+function noop() {}
 
 // const transitionDuration = 300;
 
 const ACTION_TYPES = {
-  setVisible: 'setVisible',
-  setActiveIndex: 'setActiveIndex',
-  update: 'update',
-  clear: 'clear',
+  setVisible: "setVisible",
+  setActiveIndex: "setActiveIndex",
+  update: "update",
+  clear: "clear",
 };
 
 function createAction(type, payload) {
@@ -43,6 +44,7 @@ export interface ViewerCoreState {
   loading?: boolean;
   loadFailed?: boolean;
   startLoading: boolean;
+  navImgs?: number;
 }
 
 export default (props: ViewerProps) => {
@@ -60,7 +62,7 @@ export default (props: ViewerProps) => {
     onMaskClick = noop,
     changeable = true,
     customToolbar = (toolbars) => toolbars,
-    zoomSpeed = .05,
+    zoomSpeed = 0.05,
     disableKeyboardSupport = false,
     noResetZoomAfterChange = false,
     noLimitInitializationSize = false,
@@ -72,7 +74,8 @@ export default (props: ViewerProps) => {
     noToolbar = false,
     showTotal = true,
     minScale = 0.1,
-   } = props;
+    navImgs = 5,
+  } = props;
 
   const initialState: ViewerCoreState = {
     visible: false,
@@ -148,7 +151,9 @@ export default (props: ViewerProps) => {
   const viewerCore = React.useRef<HTMLDivElement>(null);
   const init = React.useRef(false);
   const currentLoadIndex = React.useRef(0);
-  const [ state, dispatch ] = React.useReducer<(s: any, a: any) => ViewerCoreState>(reducer, initialState);
+  const [state, dispatch] = React.useReducer<
+    (s: any, a: any) => ViewerCoreState
+  >(reducer, initialState);
 
   React.useEffect(() => {
     init.current = true;
@@ -165,9 +170,11 @@ export default (props: ViewerProps) => {
   React.useEffect(() => {
     if (visible) {
       if (init.current) {
-        dispatch(createAction(ACTION_TYPES.setVisible, {
-          visible: true,
-        }));
+        dispatch(
+          createAction(ACTION_TYPES.setVisible, {
+            visible: true,
+          })
+        );
       }
     }
   }, [visible]);
@@ -183,9 +190,9 @@ export default (props: ViewerProps) => {
   React.useEffect(() => {
     if (visible) {
       if (!props.container) {
-        document.body.style.overflow = 'hidden';
+        document.body.style.overflow = "hidden";
         if (document.body.scrollHeight > document.body.clientHeight) {
-          document.body.style.paddingRight = '15px';
+          document.body.style.paddingRight = "15px";
         }
       }
     } else {
@@ -193,24 +200,28 @@ export default (props: ViewerProps) => {
     }
 
     return () => {
-      document.body.style.overflow = '';
-      document.body.style.paddingRight = '';
+      document.body.style.overflow = "";
+      document.body.style.paddingRight = "";
     };
   }, [state.visible]);
 
   React.useEffect(() => {
     if (visible) {
-      dispatch(createAction(ACTION_TYPES.setActiveIndex, {
-        index: activeIndex,
-      }));
+      dispatch(
+        createAction(ACTION_TYPES.setActiveIndex, {
+          index: activeIndex,
+        })
+      );
     }
   }, [activeIndex, visible, images]);
 
   function loadImg(currentActiveIndex, isReset = false) {
-    dispatch(createAction(ACTION_TYPES.update, {
-      loading: true,
-      loadFailed: false,
-    }));
+    dispatch(
+      createAction(ACTION_TYPES.update, {
+        loading: true,
+        loadFailed: false,
+      })
+    );
     let activeImage: ImageDecorator = null;
     if (images.length > 0) {
       activeImage = images[currentActiveIndex];
@@ -230,20 +241,26 @@ export default (props: ViewerProps) => {
         return;
       }
       if (props.defaultImg) {
-        dispatch(createAction(ACTION_TYPES.update, {
-          loading: false,
-          loadFailed: true,
-          startLoading: false,
-        }));
-        const deafultImgWidth = props.defaultImg.width || containerSize.current.width * .5;
-        const defaultImgHeight = props.defaultImg.height || containerSize.current.height * .5;
+        dispatch(
+          createAction(ACTION_TYPES.update, {
+            loading: false,
+            loadFailed: true,
+            startLoading: false,
+          })
+        );
+        const deafultImgWidth =
+          props.defaultImg.width || containerSize.current.width * 0.5;
+        const defaultImgHeight =
+          props.defaultImg.height || containerSize.current.height * 0.5;
         loadImgSuccess(deafultImgWidth, defaultImgHeight, false);
       } else {
-        dispatch(createAction(ACTION_TYPES.update, {
-          loading: false,
-          loadFailed: false,
-          startLoading: false,
-        }));
+        dispatch(
+          createAction(ACTION_TYPES.update, {
+            loading: false,
+            loadFailed: false,
+            startLoading: false,
+          })
+        );
       }
     };
     img.src = activeImage.src;
@@ -275,20 +292,22 @@ export default (props: ViewerProps) => {
         scaleY = state.scaleY;
       }
       // console.log(top, height)
-      dispatch(createAction(ACTION_TYPES.update, {
-        width: width,
-        height: height,
-        left: left,
-        top: top,
-        imageWidth: imgWidth,
-        imageHeight: imgHeight,
-        loading: false,
-        rotate: 0,
-        scaleX: scaleX,
-        scaleY: scaleY,
-        loadFailed: !success,
-        startLoading: false,
-      }));
+      dispatch(
+        createAction(ACTION_TYPES.update, {
+          width: width,
+          height: height,
+          left: left,
+          top: top,
+          imageWidth: imgWidth,
+          imageHeight: imgHeight,
+          loading: false,
+          rotate: 0,
+          scaleX: scaleX,
+          scaleY: scaleY,
+          loadFailed: !success,
+          startLoading: false,
+        })
+      );
     }
   }
 
@@ -305,10 +324,10 @@ export default (props: ViewerProps) => {
     let maxWidth = containerSize.current.width * 0.8;
     let maxHeight = (containerSize.current.height - footerHeight) * 0.8;
     width = Math.min(maxWidth, imgWidth);
-    height = width / imgWidth * imgHeight;
+    height = (width / imgWidth) * imgHeight;
     if (height > maxHeight) {
       height = maxHeight;
-      width = height / imgHeight * imgWidth;
+      width = (height / imgHeight) * imgWidth;
     }
     if (noLimitInitializationSize) {
       width = imgWidth;
@@ -334,16 +353,18 @@ export default (props: ViewerProps) => {
       const activeImage = getActiveImage(newIndex);
       props.onChange(activeImage, newIndex);
     }
-    dispatch(createAction(ACTION_TYPES.setActiveIndex, {
-      index: newIndex,
-    }));
+    dispatch(
+      createAction(ACTION_TYPES.setActiveIndex, {
+        index: newIndex,
+      })
+    );
   }
 
   function getActiveImage(activeIndex2 = undefined) {
     let activeImg2: ImageDecorator = {
-      src: '',
-      alt: '',
-      downloadUrl: '',
+      src: "",
+      alt: "",
+      downloadUrl: "",
     };
 
     let realActiveIndex = null;
@@ -363,7 +384,7 @@ export default (props: ViewerProps) => {
     const activeImage = getActiveImage();
     if (activeImage.downloadUrl) {
       if (props.downloadInNewWindow) {
-        window.open(activeImage.downloadUrl, '_blank');
+        window.open(activeImage.downloadUrl, "_blank");
       } else {
         location.href = activeImage.downloadUrl;
       }
@@ -371,21 +392,27 @@ export default (props: ViewerProps) => {
   }
 
   function handleScaleX(newScale: 1 | -1) {
-    dispatch(createAction(ACTION_TYPES.update, {
-      scaleX: state.scaleX * newScale,
-    }));
+    dispatch(
+      createAction(ACTION_TYPES.update, {
+        scaleX: state.scaleX * newScale,
+      })
+    );
   }
 
   function handleScaleY(newScale: 1 | -1) {
-    dispatch(createAction(ACTION_TYPES.update, {
-      scaleY: state.scaleY * newScale,
-    }));
+    dispatch(
+      createAction(ACTION_TYPES.update, {
+        scaleY: state.scaleY * newScale,
+      })
+    );
   }
 
   function handleRotate(isRight: boolean = false) {
-    dispatch(createAction(ACTION_TYPES.update, {
-      rotate: state.rotate + 90 * (isRight ? 1 : -1),
-    }));
+    dispatch(
+      createAction(ACTION_TYPES.update, {
+        rotate: state.rotate + 90 * (isRight ? 1 : -1),
+      })
+    );
   }
 
   function handleDefaultAction(type: ActionType) {
@@ -437,23 +464,28 @@ export default (props: ViewerProps) => {
   }
 
   function handleChangeImgState(width, height, top, left) {
-    dispatch(createAction(ACTION_TYPES.update, {
-      width: width,
-      height: height,
-      top: top,
-      left: left,
-    }));
+    dispatch(
+      createAction(ACTION_TYPES.update, {
+        width: width,
+        height: height,
+        top: top,
+        left: left,
+      })
+    );
   }
 
   function handleResize() {
     containerSize.current = setContainerWidthHeight();
     if (visible) {
       let left = (containerSize.current.width - state.width) / 2;
-      let top = (containerSize.current.height - state.height - footerHeight) / 2;
-      dispatch(createAction(ACTION_TYPES.update, {
-        left: left,
-        top: top,
-      }));
+      let top =
+        (containerSize.current.height - state.height - footerHeight) / 2;
+      dispatch(
+        createAction(ACTION_TYPES.update, {
+          left: left,
+          top: top,
+        })
+      );
     }
   }
 
@@ -462,19 +494,15 @@ export default (props: ViewerProps) => {
   }
 
   function bindEvent(remove: boolean = false) {
-    let funcName = 'addEventListener';
+    let funcName = "addEventListener";
     if (remove) {
-      funcName = 'removeEventListener';
+      funcName = "removeEventListener";
     }
     if (!disableKeyboardSupport) {
-      document[funcName]('keydown', handleKeydown, true);
+      document[funcName]("keydown", handleKeydown, true);
     }
     if (viewerCore.current) {
-      viewerCore.current[funcName](
-        'wheel',
-        handleMouseScroll,
-        false,
-      );
+      viewerCore.current[funcName]("wheel", handleMouseScroll, false);
     }
   }
 
@@ -578,7 +606,7 @@ export default (props: ViewerProps) => {
     if (state.width === 0) {
       const [imgWidth, imgHeight] = getImgWidthHeight(
         state.imageWidth,
-        state.imageHeight,
+        state.imageHeight
       );
       left = (containerSize.current.width - imgWidth) / 2;
       top = (containerSize.current.height - footerHeight - imgHeight) / 2;
@@ -590,7 +618,7 @@ export default (props: ViewerProps) => {
       let directY = state.scaleY > 0 ? 1 : -1;
       scaleX = state.scaleX + scale * direct * directX;
       scaleY = state.scaleY + scale * direct * directY;
-      if (typeof props.maxScale !== 'undefined') {
+      if (typeof props.maxScale !== "undefined") {
         if (Math.abs(scaleX) > props.maxScale) {
           scaleX = props.maxScale * directX;
         }
@@ -604,23 +632,25 @@ export default (props: ViewerProps) => {
       if (Math.abs(scaleY) < minScale) {
         scaleY = minScale * directY;
       }
-      top = state.top + -direct * diffY / state.scaleX * scale * directX;
-      left = state.left + -direct * diffX / state.scaleY * scale * directY;
+      top = state.top + ((-direct * diffY) / state.scaleX) * scale * directX;
+      left = state.left + ((-direct * diffX) / state.scaleY) * scale * directY;
       width = state.width;
       height = state.height;
     }
-    dispatch(createAction(ACTION_TYPES.update, {
-      width: width,
-      scaleX: scaleX,
-      scaleY: scaleY,
-      height: height,
-      top: top,
-      left: left,
-      loading: false,
-    }));
+    dispatch(
+      createAction(ACTION_TYPES.update, {
+        width: width,
+        scaleX: scaleX,
+        scaleY: scaleY,
+        height: height,
+        top: top,
+        left: left,
+        loading: false,
+      })
+    );
   }
 
-  const prefixCls = 'react-viewer';
+  const prefixCls = "react-viewer";
 
   const className = classnames(`${prefixCls}`, `${prefixCls}-transition`, {
     [`${prefixCls}-inline`]: props.container,
@@ -628,16 +658,22 @@ export default (props: ViewerProps) => {
   });
 
   let viewerStryle: React.CSSProperties = {
-    opacity: (visible && state.visible) ? 1 : 0,
-    display: (visible || state.visible) ? 'block' : 'none',
+    opacity: visible && state.visible ? 1 : 0,
+    display: visible || state.visible ? "block" : "none",
   };
 
   let activeImg: ImageDecorator = {
-    src: '',
-    alt: '',
+    src: "",
+    alt: "",
   };
 
-  if (visible && state.visible && !state.loading && state.activeIndex !== null && !state.startLoading) {
+  if (
+    visible &&
+    state.visible &&
+    !state.loading &&
+    state.activeIndex !== null &&
+    !state.startLoading
+  ) {
     activeImg = getActiveImage();
   }
   // console.log(className)
@@ -647,28 +683,33 @@ export default (props: ViewerProps) => {
       style={viewerStryle}
       onTransitionEnd={() => {
         if (!visible) {
-          dispatch(createAction(ACTION_TYPES.setVisible, {
-            visible: false,
-          }));
+          dispatch(
+            createAction(ACTION_TYPES.setVisible, {
+              visible: false,
+            })
+          );
         }
       }}
       ref={viewerCore}
     >
       <div className={`${prefixCls}-mask`} style={{ zIndex: zIndex }} />
       {props.noClose || (
-        <div
-          className={`${prefixCls}-close ${prefixCls}-btn`}
+        <img
+          src={close}
+          className={`${prefixCls}-close`}
           onClick={() => {
             onClose();
           }}
           style={{ zIndex: zIndex + 10 }}
-        >
-          <Icon type={ActionType.close} />
-        </div>
+        />
       )}
       <ViewerCanvas
         prefixCls={prefixCls}
-        imgSrc={state.loadFailed ? (props.defaultImg.src || activeImg.src) : activeImg.src}
+        imgSrc={
+          state.loadFailed
+            ? props.defaultImg.src || activeImg.src
+            : activeImg.src
+        }
         visible={visible}
         width={state.width}
         height={state.height}
@@ -713,6 +754,7 @@ export default (props: ViewerProps) => {
               images={props.images}
               activeIndex={state.activeIndex}
               onChangeImg={handleChangeImg}
+              navImgs={navImgs}
             />
           )}
         </div>
