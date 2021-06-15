@@ -7,10 +7,8 @@
     "removeComments": false,
     "allowSyntheticDefaultImports": true,
     "experimentalDecorators": true,
-    "noUnusedLocals": true
+    "noUnusedLocals": true,
+    "typeRoots": ["node_modules/@types", "src/types"]
   },
-  "exclude": [
-    "node_modules",
-    "__tests__"
-  ]
+  "exclude": ["node_modules", "__tests__"]
 }
